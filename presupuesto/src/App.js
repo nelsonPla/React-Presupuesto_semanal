@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Pregunta from './components/pregunta'
 import Formulario from './components/Formulario'
 import Listado from './components/Listado'
@@ -6,58 +6,72 @@ import ControlPresupuesto from './components/ControlPresupuesto'
 
 function App() {
 
-    //definicion de state
-    const [presupuesto, guardarPresupuesto] = useState(0);
-    const [restante, guardarRestante] = useState(0);
-    const [ mostrarpregunta, actualizarPregunta] = useState(true);
-    const [ gastos, guardarGastos ] = useState([]);
 
-    //cuando agreguemos un nuevo gasto
-    const agregarNuevoGasto = gasto => {
-        guardarGastos([
-            ...gastos,//copia de gastos previos
-            gasto
-        ])
-    }
+    //definicion de state
+    const [ presupuesto, guardarPresupuesto ] = useState(0);
+    const [ restante, guardarRestante ] = useState(0);
+    const [ mostrarpregunta, actualizarPregunta ] = useState(true);
+    const [ gastos, guardarGastos ] = useState([]);
+    const [ gasto, guardarGasto ] = useState({});
+    const [ creargasto, guardarCrearGasto ] = useState(false); 
+
+    //use effect
+    useEffect(() => {
+
+        //agrega el nuevo presupuesto
+
+
+        if(creargasto){
+            guardarGastos([
+                ...gastos, //copia de gastos previos
+                gasto
+            ]);
+        }
+
+        //resta el nuevo presupuesto
+        const presupuestoRestante = restante - gasto.cantidad;
+        guardarRestante(presupuestoRestante)
+
+        //aqui reiniciamos a false
+        guardarCrearGasto(false);
+    }, [gasto]);
+
 
 
 
     return ( 
-        <div className = "container">
-            <header>
-            <h1> GASTO SEMANAL </h1>     
-            <div className = "contenido-principal contenido" > {
-                mostrarpregunta ?
+        <div className = "container" >
+        <header >
+        <h1> GASTO SEMANAL </h1>      
+        <div className = "contenido-principal contenido" > 
+        {
+            mostrarpregunta ?
+            ( 
+                <Pregunta guardarPresupuesto = { guardarPresupuesto }
+                guardarRestante = { guardarRestante }
+                actualizarPregunta = { actualizarPregunta }/> 
+            ) :
                 ( 
-                    <Pregunta 
-                        guardarPresupuesto = { guardarPresupuesto }
-                        guardarRestante = { guardarRestante }
-                        actualizarPregunta = { actualizarPregunta }
-                    /> 
-                ) :
-                ( 
-                    <div className = "row" >
-                        <div className = "one-half column">
-                            <Formulario
-                                agregarNuevoGasto={agregarNuevoGasto}
-                            />
-                        </div> 
-                        <div className = "one-half column">
-                            <Listado
-                                gastos={gastos}
-                            />
-                            <ControlPresupuesto
-                                presupuesto={presupuesto}
-                                restante={restante}
-                            />
-                        </div> 
-                    </div>
-                )
+                <div className = "row">
+                    <div className = "one-half column" >
+                        <Formulario 
+                            guardarGasto = { guardarGasto }
+                            guardarCrearGasto = { guardarCrearGasto }
+                            restante = { restante }
+                        /> 
+                    </div>  
+                    <div className = "one-half column" >
+                        <Listado gastos = { gastos }/> 
+                        <ControlPresupuesto presupuesto = { presupuesto }
+                        restante = { restante }/> 
+                    </div>  
+                </div>
+            )
         }
 
-            </div>    
-            </header>   
-        </div>
+        </div>     
+        </header>    
+    </div>
     );
 }
 
